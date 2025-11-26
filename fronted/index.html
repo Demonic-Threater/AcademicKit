@@ -1,0 +1,535 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>SyntheGen — Utility Hub</title>
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Space+Grotesk:wght@600&display=swap" rel="stylesheet">
+
+<style>
+/* --- CORE FUTURISTIC UTILITY STYLES --- */
+:root {
+  --bg1: #06090e;
+  --accent1: #00d4ff;
+  --accent2: #6a00ff;
+  --glass: rgba(255, 255, 255, 0.08);
+  --muted: rgba(190, 200, 220, 0.8);
+  --border-color: rgba(255, 255, 255, 0.12);
+}
+
+* {
+  box-sizing: border-box
+}
+
+html,body {
+  height: 100%
+}
+
+body {
+  margin: 0;
+  font-family: Inter, system-ui, Segoe UI, Roboto, Arial, sans-serif;
+  background: radial-gradient(1200px 700px at 10% 10%, rgba(0, 212, 255, 0.15), transparent 15%),
+    radial-gradient(1000px 600px at 90% 90%, rgba(106, 0, 255, 0.1), transparent 15%),
+    var(--bg1);
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: 1200px;
+  margin: 40px auto;
+  padding: 20px
+}
+
+/* --- HERO/TITLE SECTION --- */
+.hero {
+  text-align: center;
+  margin-bottom: 50px;
+}
+
+.title {
+  font-family: "Space Grotesk", Inter;
+  font-size: 48px;
+  margin-bottom: 8px;
+  text-shadow: 0 0 15px rgba(0, 212, 255, 0.3);
+}
+
+.subtitle {
+  color: var(--muted);
+  max-width: 800px;
+  margin: 0 auto 40px;
+  font-size: 1.2em;
+}
+
+/* --- FEATURE CARD GRID --- */
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 24px;
+}
+
+.feature-card {
+  background: var(--glass);
+  padding: 24px;
+  border-radius: 12px;
+  border: 1px solid var(--border-color);
+  color: #fff;
+  transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-height: 180px;
+}
+
+.feature-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--accent1);
+  box-shadow: 0 10px 25px rgba(0, 212, 255, 0.2);
+}
+
+.feature-card h3 {
+  font-family: "Space Grotesk";
+  color: var(--accent1);
+  margin-top: 0;
+  font-size: 1.4em;
+}
+
+.feature-card p {
+  color: var(--muted);
+  font-size: 0.95em;
+}
+
+/* --- UTILITY VIEWS CONTAINER --- */
+.utility-view {
+  display: none; /* Hide all views initially */
+  margin-top: 40px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.utility-view.active {
+  display: block; /* Show the active view */
+}
+
+/* --- BACK BUTTON --- */
+#back-to-home {
+  display: none;
+  background: none;
+  border: 1px solid var(--muted);
+  color: var(--muted);
+  padding: 8px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-bottom: 20px;
+  transition: all 0.2s;
+}
+
+#back-to-home:hover {
+  color: var(--accent1);
+  border-color: var(--accent1);
+}
+
+
+/* --- FRONT PAGE GENERATOR STYLES (RETAINED) --- */
+.hero-feature { /* Re-used class name for sub-feature layout */
+  display: grid;
+  grid-template-columns: 1fr 420px;
+  gap: 40px;
+  align-items: start;
+}
+
+.glass {
+  background: var(--glass);
+  border-radius: 18px;
+  padding: 24px;
+  backdrop-filter: blur(12px);
+  border: 1px solid var(--border-color);
+  box-shadow: 0 0 40px rgba(0, 212, 255, 0.08), 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px
+}
+
+.row {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+
+.row input {
+  flex: 1;
+  padding: 14px;
+  border-radius: 8px;
+  border: 1px solid var(--border-color);
+  background: rgba(0, 0, 0, 0.3);
+  color: #fff;
+  transition: border-color 0.2s;
+}
+
+.row input:focus {
+  outline: none;
+  border-color: var(--accent1);
+  box-shadow: 0 0 0 2px rgba(0, 212, 255, 0.3);
+}
+
+.row input::placeholder {
+  color: rgba(255, 255, 255, 0.4)
+}
+
+.subject-group {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.add-sub-button,
+.remove-sub-button {
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border-radius: 8px;
+  border: none;
+  font-size: 24px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.1s;
+}
+
+.add-sub-button {
+  background-color: var(--accent1);
+  color: var(--bg1);
+  box-shadow: 0 4px 15px rgba(0, 212, 255, 0.2);
+}
+
+.add-sub-button:hover {
+  background-color: #00e9ff;
+}
+
+.remove-sub-button {
+  background: rgba(255, 50, 50, 0.8);
+  color: #fff;
+  font-size: 20px;
+}
+
+.remove-sub-button:hover {
+  background: rgb(255, 80, 80);
+}
+
+
+.actions {
+  display: flex;
+  gap: 12px;
+  align-items: center
+}
+
+button#generateBtn {
+  flex: 1;
+  padding: 14px 20px;
+  border-radius: 8px;
+  border: none;
+  background: linear-gradient(90deg, var(--accent1), var(--accent2));
+  color: var(--bg1);
+  font-weight: 700;
+  cursor: pointer;
+  box-shadow: 0 8px 25px rgba(0, 212, 255, 0.3);
+  transition: transform 0.1s;
+}
+
+button#generateBtn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px rgba(0, 212, 255, 0.4);
+}
+
+button#generateBtn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.status {
+  margin-top: 8px;
+  color: var(--accent1);
+  font-size: 14px;
+  font-family: monospace, "Space Grotesk";
+}
+
+/* Responsive Overrides */
+@media(max-width:980px) {
+  .hero {
+    margin-bottom: 30px;
+  }
+  .title {
+    font-size: 36px;
+  }
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+  .hero-feature {
+    grid-template-columns: 1fr;
+    gap: 20px;
+  }
+  .row {
+    flex-direction: column;
+  }
+  .subject-input-row {
+    flex-direction: row; /* Keep input and button side-by-side */
+  }
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <header class="hero" id="homepage-header">
+    <h1 class="title">AcademicKit</h1>
+    <p class="subtitle">The central hub for academic and technical synthesis. Select a utility to begin generating documents and data.</p>
+  </header>
+
+  <section id="feature-selection" class="features-grid">
+    </section>
+  
+  <button id="back-to-home" aria-label="Back to feature selection">← Back to Hub</button>
+
+  <div id="utility-views">
+    
+    <div id="feature-frontpage" class="utility-view">
+      <h2 style="color:var(--accent1); font-family: 'Space Grotesk';">Frontpage Generator</h2>
+      
+      <div class="hero-feature">
+        <div class="hero-left">
+          <p class="subtitle" style="margin-top:0;">Instantly create premium student frontpages, optimized for clean submission. Hardcoded to PDF output for maximum compatibility.</p>
+          <div class="device-row">
+           
+          </div>
+        </div>
+        
+        <div class="hero-right">
+          <div class="glass">
+            <form id="pdfForm" class="form">
+              <div class="row">
+                <input name="student_name" placeholder="Student Name" required />
+                <input name="class" placeholder="Class (eg. 12)" required />
+              </div>
+              <div class="row">
+                <input name="registration_no" placeholder="Registration No" required />
+                <input name="roll_no" placeholder="Roll No" required />
+              </div>
+              <div class="row">
+                <input name="start_year" placeholder="Start Year" required />
+                <input name="end_year" placeholder="End Year" required />
+              </div>
+              
+              <div id="subject-fields" class="subject-group">
+                <div class="row subject-input-row">
+                    <input name="subject_1" placeholder="Subject Name (Primary)" required />
+                    <button type="button" id="addSubBtn" class="add-sub-button">+</button>
+                </div>
+              </div>
+              
+              <div class="actions">
+                <button id="generateBtn" type="submit">Generate PDF</button>
+              </div>
+              <div id="status" class="status">Ready</div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    </div>
+</main>
+
+<script>
+/* ====== CONFIG: set this to your backend API base URL ====== */
+const API_BASE = "https://your-backend.example.com";
+
+// --- CORE FEATURE CONFIGURATION (JSON) ---
+const featuresConfig = [
+    {
+        id: 'frontpage',
+        name: 'Frontpage Generator',
+        description: 'Generate professional, clean academic front pages instantly. Supports multiple subjects.',
+        target: '#feature-frontpage' // Target element ID for client-side routing
+    }
+];
+
+// --- DOM ELEMENTS ---
+const homepageHeader = document.getElementById('homepage-header');
+const featureSelection = document.getElementById('feature-selection');
+const utilityViews = document.getElementById('utility-views');
+const backButton = document.getElementById('back-to-home');
+
+// --- APP ROUTING & UI MANAGEMENT ---
+
+// 1. Render Feature Cards from JSON
+featuresConfig.forEach(feature => {
+    const card = document.createElement('div');
+    card.classList.add('feature-card');
+    card.setAttribute('data-target', feature.target);
+    card.innerHTML = `
+        <h3>${feature.name}</h3>
+        <p>${feature.description}</p>
+    `;
+    card.addEventListener('click', () => handleFeatureSelect(feature));
+    featureSelection.appendChild(card);
+});
+
+// 2. Handle Feature Click (Routing)
+function handleFeatureSelect(feature) {
+    if (feature.target.startsWith('#')) {
+        // Client-Side Route: Show the specific utility div
+        const targetElement = document.querySelector(feature.target);
+        if (!targetElement) return;
+
+        // Hide homepage elements
+        homepageHeader.style.display = 'none';
+        featureSelection.style.display = 'none';
+        backButton.style.display = 'block';
+
+        // Show selected utility
+        document.querySelectorAll('.utility-view').forEach(view => {
+            view.classList.remove('active');
+        });
+        targetElement.classList.add('active');
+
+    } else {
+        // Server-Side/External Route: Redirect
+        window.location.href = feature.target;
+    }
+}
+
+// 3. Handle Back Button
+backButton.addEventListener('click', () => {
+    // Show homepage elements
+    homepageHeader.style.display = 'block';
+    featureSelection.style.display = 'grid';
+    backButton.style.display = 'none';
+
+    // Hide all utility views
+    document.querySelectorAll('.utility-view').forEach(view => {
+        view.classList.remove('active');
+    });
+});
+
+
+// --- FRONT PAGE GENERATOR LOGIC (RETAINED) ---
+const form = document.getElementById('pdfForm');
+const statusEl = document.getElementById('status');
+const generateBtn = document.getElementById('generateBtn');
+const addSubBtn = document.getElementById('addSubBtn');
+const subjectFields = document.getElementById('subject-fields');
+let subjectCount = 1;
+
+// Dynamic Subject Field Logic
+form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    statusEl.textContent = 'Generating...';
+    generateBtn.disabled = true;
+
+    try {
+        const fm = new FormData(form);
+
+        // Collect all subjects dynamically
+        const subjects = [];
+        document.querySelectorAll('#subject-fields input').forEach(input => {
+            if (input.value.trim() !== '') subjects.push(input.value.trim());
+        });
+
+        fm.append('subjects', JSON.stringify(subjects)); // send as JSON array
+        fm.append('output_format', 'pdf'); // optional
+
+        const res = await fetch(API_BASE + '/generate', {
+            method: 'POST',
+            body: fm
+        });
+
+        if (!res.ok) {
+            const text = await res.text();
+            throw new Error('Server error: ' + text);
+        }
+
+        const blob = await res.blob();
+        let fname = 'frontpage.pdf'; 
+
+        const cd = res.headers.get('content-disposition');
+        if (cd) {
+            const m = cd.match(/filename="([^"]+)"/);
+            if (m) fname = m[1];
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+
+        statusEl.textContent = 'Done — file downloaded';
+    } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error: ' + (err.message || err);
+    } finally {
+        generateBtn.disabled = false;
+        setTimeout(() => statusEl.textContent = 'Ready', 3000);
+    }
+});
+
+
+// Form Submission Logic
+if (form) { // Check if form exists
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      statusEl.textContent = 'Generating...';
+      generateBtn.disabled = true;
+
+      try {
+        const fm = new FormData(form);
+        fm.append('output_format', 'pdf'); // Hardcoded PDF
+        
+        const res = await fetch(API_BASE + '/generate', {
+          method: 'POST',
+          body: fm
+        });
+
+        if (!res.ok) {
+          const text = await res.text();
+          throw new Error('Server error: ' + text);
+        }
+
+        const blob = await res.blob();
+        let fname = 'frontpage.pdf'; 
+        
+        const cd = res.headers.get('content-disposition');
+        if (cd) {
+          const m = cd.match(/filename="([^"]+)"/);
+          if (m) fname = m[1];
+        }
+
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fname;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        statusEl.textContent = 'Done — file downloaded';
+      } catch (err) {
+        console.error(err);
+        statusEl.textContent = 'Error: ' + (err.message || err);
+      } finally {
+        generateBtn.disabled = false;
+        setTimeout(()=> statusEl.textContent = 'Ready', 3000);
+      }
+    });
+}
+</script>
+</body>
+</html>
