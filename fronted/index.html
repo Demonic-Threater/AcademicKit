@@ -346,195 +346,180 @@ button#generateBtn:disabled {
 
 <script>
 /* ====== CONFIG: set this to your backend API base URL ====== */
+/* ====== CONFIG ====== */
 const API_BASE = "https://web-production-3b107.up.railway.app";
 
+// -------- Feature Cards Rendering --------
+const featuresConfig = [{
+    id: 'frontpage',
+    name: 'Frontpage Generator',
+    description: 'Generate professional, clean academic front pages instantly. Supports multiple subjects.',
+    target: '#feature-frontpage'
+}];
 
-// --- CORE FEATURE CONFIGURATION (JSON) ---
-const featuresConfig = [
-    {
-        id: 'frontpage',
-        name: 'Frontpage Generator',
-        description: 'Generate professional, clean academic front pages instantly. Supports multiple subjects.',
-        target: '#feature-frontpage' // Target element ID for client-side routing
-    }
-];
-
-// --- DOM ELEMENTS ---
 const homepageHeader = document.getElementById('homepage-header');
 const featureSelection = document.getElementById('feature-selection');
-const utilityViews = document.getElementById('utility-views');
 const backButton = document.getElementById('back-to-home');
 
-// --- APP ROUTING & UI MANAGEMENT ---
-
-// 1. Render Feature Cards from JSON
-featuresConfig.forEach(feature => {
-    const card = document.createElement('div');
-    card.classList.add('feature-card');
-    card.setAttribute('data-target', feature.target);
-    card.innerHTML = `
-        <h3>${feature.name}</h3>
-        <p>${feature.description}</p>
-    `;
-    card.addEventListener('click', () => handleFeatureSelect(feature));
+// Render Feature Cards
+featuresConfig.forEach(f => {
+    const card = document.createElement("div");
+    card.className = "feature-card";
+    card.dataset.target = f.target;
+    card.innerHTML = `<h3>${f.name}</h3><p>${f.description}</p>`;
+    card.onclick = () => openUtility(f.target);
     featureSelection.appendChild(card);
 });
 
-// 2. Handle Feature Click (Routing)
-function handleFeatureSelect(feature) {
-    if (feature.target.startsWith('#')) {
-        // Client-Side Route: Show the specific utility div
-        const targetElement = document.querySelector(feature.target);
-        if (!targetElement) return;
+// Utility Routing
+function openUtility(id) {
+    homepageHeader.style.display = "none";
+    featureSelection.style.display = "none";
+    backButton.style.display = "block";
 
-        // Hide homepage elements
-        homepageHeader.style.display = 'none';
-        featureSelection.style.display = 'none';
-        backButton.style.display = 'block';
-
-        // Show selected utility
-        document.querySelectorAll('.utility-view').forEach(view => {
-            view.classList.remove('active');
-        });
-        targetElement.classList.add('active');
-
-    } else {
-        // Server-Side/External Route: Redirect
-        window.location.href = feature.target;
-    }
+    document.querySelectorAll(".utility-view").forEach(v => v.classList.remove("active"));
+    document.querySelector(id).classList.add("active");
 }
 
-// 3. Handle Back Button
-backButton.addEventListener('click', () => {
-    // Show homepage elements
-    homepageHeader.style.display = 'block';
-    featureSelection.style.display = 'grid';
-    backButton.style.display = 'none';
+backButton.onclick = () => {
+    homepageHeader.style.display = "block";
+    featureSelection.style.display = "grid";
+    backButton.style.display = "none";
 
-    // Hide all utility views
-    document.querySelectorAll('.utility-view').forEach(view => {
-        view.classList.remove('active');
-    });
-});
+    document.querySelectorAll(".utility-view").forEach(v => v.classList.remove("active"));
+};
 
 
-// --- FRONT PAGE GENERATOR LOGIC (RETAINED) ---
-const form = document.getElementById('pdfForm');
-const statusEl = document.getElementById('status');
-const generateBtn = document.getElementById('generateBtn');
-const addSubBtn = document.getElementById('addSubBtn');
-const subjectFields = document.getElementById('subject-fields');
+// -------- Frontpage Generator Logic --------
+const form = document.getElementById("pdfForm");
+const statusEl = document.getElementById("status");
+const generateBtn = document.getElementById("generateBtn");
+const addSubBtn = document.getElementById("addSubBtn");
+const subjectFields = document.getElementById("subject-fields");
 let subjectCount = 1;
 
-// Dynamic Subject Field Logic
-form.addEventListener('submit', async (e) => {
+// Add subject field
+addSubBtn.onclick = () => {
+    subjectCount++;
+    const wrap = document.createElement("div");
+    wrap.className = "row subject-input-row";
+    wrap.innerHTML = `
+      <input name="subject_${subjectCount}" placeholder="Subject Name" required />
+      <button type="button" class="remove-sub-button">−</button>
+    `;
+    wrap.querySelector(".remove-sub-button").onclick = () => wrap.remove();
+    subjectFields.appendChild(wrap);
+};
+
+// Better UI error message
+function showUserError(msg) {
+    statusEl.textContent = msg;
+    statusEl.style.color = "#ff6b6b"; // subtle red
+    setTimeout(() => {
+        statusEl.textContent = "Ready";
+        statusEl.style.color = "var(--accent1)";
+    }, 4000);
+}
+
+// Convert server error → human-friendly
+function mapServerError(errText) {
+    if (errText.includes("Template not found"))
+        return "Template missing on server. Contact admin.";
+
+    if (errText.includes("PDF conversion failed"))
+        return "Server unable to convert PDF. Try again later.";
+
+    if (errText.includes("Invalid subjects JSON"))
+        return "Please check subjects input format.";
+
+    if (errText.includes("No subjects"))
+        return "Add at least one subject.";
+
+    return "Something went wrong. Try again.";
+}
+
+// Form submit handler
+form.onsubmit = async (e) => {
     e.preventDefault();
-    statusEl.textContent = 'Generating...';
+
+    statusEl.textContent = "Generating...";
     generateBtn.disabled = true;
 
     try {
+        // Offline / No internet check
+        if (!navigator.onLine)
+            throw new Error("offline");
+
         const fm = new FormData(form);
 
-        // Collect all subjects dynamically
-        const subjects = [];
-        document.querySelectorAll('#subject-fields input').forEach(input => {
-            if (input.value.trim() !== '') subjects.push(input.value.trim());
+        // subjects array
+        const subjects = [...document.querySelectorAll('#subject-fields input')]
+            .map(i => i.value.trim())
+            .filter(v => v !== "");
+
+        fm.append("subjects", JSON.stringify(subjects));
+
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 20000); // 20s timeout
+
+        const res = await fetch(API_BASE + "/generate", {
+            method: "POST",
+            body: fm,
+            signal: controller.signal
         });
 
-        fm.append('subjects', JSON.stringify(subjects)); // send as JSON array
-        fm.append('output_format', 'pdf'); // optional
-
-        const res = await fetch(API_BASE + '/generate', {
-            method: 'POST',
-            body: fm
-        });
+        clearTimeout(timeout);
 
         if (!res.ok) {
-            const text = await res.text();
-            throw new Error('Server error: ' + text);
+            const errText = await res.text();
+            throw new Error(mapServerError(errText));
         }
 
+        // Get PDF
         const blob = await res.blob();
-        let fname = 'frontpage.pdf'; 
+        const url = URL.createObjectURL(blob);
 
-        const cd = res.headers.get('content-disposition');
+        const cd = res.headers.get("Content-Disposition");
+        let filename = "frontpage.pdf";
         if (cd) {
-            const m = cd.match(/filename="([^"]+)"/);
-            if (m) fname = m[1];
+            const match = cd.match(/filename="([^"]+)"/);
+            if (match) filename = match[1];
         }
 
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
+        const a = document.createElement("a");
         a.href = url;
-        a.download = fname;
+        a.download = filename;
         document.body.appendChild(a);
         a.click();
         a.remove();
-        window.URL.revokeObjectURL(url);
+        URL.revokeObjectURL(url);
 
-        statusEl.textContent = 'Done — file downloaded';
-    } catch (err) {
-        console.error(err);
-        statusEl.textContent = 'Error: ' + (err.message || err);
-    } finally {
-        generateBtn.disabled = false;
-        setTimeout(() => statusEl.textContent = 'Ready', 3000);
+        statusEl.textContent = "Done — file downloaded";
     }
-});
 
+    catch (err) {
+        console.error("Real error →", err);
 
-// Form Submission Logic
-if (form) { // Check if form exists
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      statusEl.textContent = 'Generating...';
-      generateBtn.disabled = true;
+        if (err.name === "AbortError")
+            showUserError("Server took too long. Try again.");
+        else if (err.message === "offline")
+            showUserError("No internet connection.");
+        else if (err.message.includes("Failed to fetch"))
+            showUserError("Server unreachable. Check backend.");
+        else
+            showUserError(err.message || "Unexpected error.");
+    }
 
-      try {
-        const fm = new FormData(form);
-        fm.append('output_format', 'pdf'); // Hardcoded PDF
-        
-        const res = await fetch(API_BASE + '/generate', {
-          method: 'POST',
-          body: fm
-        });
-
-        if (!res.ok) {
-          const text = await res.text();
-          throw new Error('Server error: ' + text);
-        }
-
-        const blob = await res.blob();
-        let fname = 'frontpage.pdf'; 
-        
-        const cd = res.headers.get('content-disposition');
-        if (cd) {
-          const m = cd.match(/filename="([^"]+)"/);
-          if (m) fname = m[1];
-        }
-
-        const url = window.URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = fname;
-        document.body.appendChild(a);
-        a.click();
-        a.remove();
-        window.URL.revokeObjectURL(url);
-        statusEl.textContent = 'Done — file downloaded';
-      } catch (err) {
-        console.error(err);
-        statusEl.textContent = 'Error: ' + (err.message || err);
-      } finally {
+    finally {
         generateBtn.disabled = false;
-        setTimeout(()=> statusEl.textContent = 'Ready', 3000);
-      }
-    });
-}
+        setTimeout(() => statusEl.textContent = "Ready", 3000);
+    }
+};
 </script>
 </body>
 
 </html>
+
 
 
 
